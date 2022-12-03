@@ -1,7 +1,7 @@
 node_modules
-heroicons
-index.ts
-index.mts
-outline
-solid
-mini-solid
+/heroicons
+/index.ts
+/index.mts
+/outline
+/solid
+/mini-solid
