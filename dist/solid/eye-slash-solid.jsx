@@ -1,3 +1,5 @@
+/** @jsx h */
+import { h } from "preact";
 import { forwardRef } from "preact/compat";
 export const EyeSlashSolid = forwardRef((props, ref) => {
     return (<svg {...props} ref={ref} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">

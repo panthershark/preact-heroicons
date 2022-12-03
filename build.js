@@ -1,7 +1,7 @@
-import { exec } from 'node:child_process';
-import { existsSync } from 'node:fs';
-import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
-import { dirname, join } from 'node:path';
+import { exec } from "node:child_process";
+import { existsSync } from "node:fs";
+import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
+import { dirname, join } from "node:path";
 
 const __dirname = dirname(new URL(import.meta.url).pathname);
 
@@ -16,7 +16,7 @@ function execShellCommand(cmd) {
 }
 
 function clearAndUpper(text) {
-  return text.replace(/-/, '').toUpperCase();
+  return text.replace(/-/, "").toUpperCase();
 }
 
 function toCamelCase(text) {
@@ -42,7 +42,7 @@ function convertSvgPropsToPreactProps(svg) {
 }
 
 function removeFill(svg) {
-  return svg.replace(/ fill="#fff"/, '');
+  return svg.replace(/ fill="#fff"/, "");
 }
 
 function setStrokeToCurrent(svg) {
@@ -50,28 +50,28 @@ function setStrokeToCurrent(svg) {
 }
 
 function properlyIndent(svg) {
-  return svg.trim().split('\n').join('\n    ');
+  return svg.trim().split("\n").join("\n    ");
 }
 
 const processSVG = pipe(spreadProps, convertSvgPropsToPreactProps, removeFill, setStrokeToCurrent, properlyIndent);
 
-const folder = join(__dirname, 'heroicons');
+const folder = join(__dirname, "heroicons");
 const iconsFolder = __dirname; // Beware that this could break if the file is moved
 
-const gitRepo = 'git clone https://github.com/tailwindlabs/heroicons.git';
+const gitRepo = "git clone https://github.com/tailwindlabs/heroicons.git";
 
 const imports = [];
 
 const iconTypes = {
-  outline: ['24', 'outline'],
-  solid: ['24', 'solid'],
-  'mini-solid': ['20', 'solid']
+  outline: ["24", "outline"],
+  solid: ["24", "solid"],
+  "mini-solid": ["20", "solid"],
 };
 
 const processRepo = async () => {
   try {
     const folderPromises = Object.entries(iconTypes).map(async ([svgType, iconPath]) => {
-      const srcFolder = join(folder, 'optimized', ...iconPath);
+      const srcFolder = join(folder, "optimized", ...iconPath);
       const outFolder = join(iconsFolder, svgType);
       await execShellCommand(`rm -rf ${outFolder}`);
 
@@ -82,8 +82,8 @@ const processRepo = async () => {
       const iconPromises = iconFiles.map(async (svg) => {
         const src = join(srcFolder, svg);
 
-        const everythingButExtension = svg.slice(0, svg.lastIndexOf('.'));
-        const outName = everythingButExtension + '-' + svgType;
+        const everythingButExtension = svg.slice(0, svg.lastIndexOf("."));
+        const outName = everythingButExtension + "-" + svgType;
         const outFileName = `${outName}.tsx`;
         const out = join(outFolder, outFileName);
         const pascalName = toPascalCase(outName);
@@ -95,6 +95,7 @@ const processRepo = async () => {
         await writeFile(
           out,
           `
+/** @jsx h */
 import { h } from "preact";
 import { forwardRef } from "preact/compat";
 import { HeroIcon } from "../types";
@@ -104,7 +105,7 @@ export const ${pascalName}: HeroIcon = forwardRef((props, ref) => {
     ${component}
   )
 })
-          `.trim() + '\n'
+          `.trim() + "\n"
         );
       });
 
@@ -114,12 +115,12 @@ export const ${pascalName}: HeroIcon = forwardRef((props, ref) => {
     await Promise.all(folderPromises);
     console.log(`Built ${imports.length} icons!`);
     await writeFile(
-      'index.mts',
+      "index.mts",
       imports
         .sort(([_, a], [__, b]) => a.localeCompare(b))
-        .map(([importPath, name]) => `export { ${name} } from "./${importPath.split('.')[0]}";`)
-        .join('\n') +
-        '\n' +
+        .map(([importPath, name]) => `export { ${name} } from "./${importPath.split(".")[0]}";`)
+        .join("\n") +
+        "\n" +
         `export type { HeroIcon } from "./types";`
     );
   } catch (e) {
@@ -128,11 +129,11 @@ export const ${pascalName}: HeroIcon = forwardRef((props, ref) => {
 };
 
 (async () => {
-  console.time('Generating Icon Components');
+  console.time("Generating Icon Components");
   console.log(`Cloning ${gitRepo} to ${folder}`);
   await execShellCommand(`${gitRepo} ${folder}`);
   await processRepo();
-  console.log('Removing the repo...');
+  console.log("Removing the repo...");
   await execShellCommand(`rm -rf ${folder}`);
-  console.timeEnd('Generating Icon Components');
+  console.timeEnd("Generating Icon Components");
 })();
