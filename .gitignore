@@ -2,7 +2,6 @@ node_modules
 heroicons
 index.ts
 index.mts
-dist
 outline
 solid
 mini-solid
