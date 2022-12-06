@@ -136,7 +136,7 @@ export const ${pascalName}: HeroIcon = forwardRef((props, ref) => {
     await Promise.all(folderPromises);
     console.log(`Built ${imports.length} icons!`);
     await writeFile(
-      join(genDir, "index.ts"),
+      join(genDir, "index.mts"),
       imports
         .sort(([_, a], [__, b]) => a.localeCompare(b))
         .map(
