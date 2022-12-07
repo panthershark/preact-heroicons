@@ -19,7 +19,8 @@
     "generate": "node build.js && npm run format",
     "test": "vitest",
     "transpile": "tsc",
-    "publish": "npm publish --access public --publish-branch preact-heroicons"
+    "publish": "npm publish --access public --publish-branch preact-heroicons",
+    "postinstall": "npm run generate && npm run transpile"
   },
   "repository": "github:ekwoka/preact-heroicons",
   "keywords": [
