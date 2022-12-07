@@ -12,9 +12,9 @@
   },
   "sideEffects": false,
   "scripts": {
+    "build": "npm run generate && npm run transpile && rm -rf gen",
     "checkversion": "node scripts/checkversion.js",
     "clean": "rm -rf dist && rm -rf gen",
-    "ci": "npm run generate && npm run transpile && rm -rf gen",
     "format": "prettier --write \"./**/*.{js,jsx,ts,tsx,mjs,mts}\"",
     "generate": "node build.js && npm run format",
     "test": "vitest",
