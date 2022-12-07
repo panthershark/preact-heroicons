@@ -1,6 +1,6 @@
 {
   "name": "@panthershark/preact-heroicons",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Wraps tailwind heroicons in preact components.",
   "type": "module",
   "types": "./dist/index.d.mts",
