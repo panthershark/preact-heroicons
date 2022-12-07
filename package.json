@@ -58,6 +58,6 @@
     "vitest": "^0.25.3"
   },
   "peerDependencies": {
-    "preact": "10 - 11"
+    "preact": "^10.5.0"
   }
 }
