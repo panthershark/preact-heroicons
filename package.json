@@ -44,7 +44,7 @@
   },
   "homepage": "https://github.com/ekwoka/preact-heroicons#readme",
   "files": [
-    "dist"
+    "."
   ],
   "devDependencies": {
     "@preact/preset-vite": "^2.4.0",
