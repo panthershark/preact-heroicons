@@ -3,11 +3,16 @@
   "version": "2.0.13",
   "description": "Heroicons as Preact components",
   "type": "module",
-  "types": "./dist/index.d.ts",
-  "module": "./dist/index.js",
+  "types": "./dist/index.d.mts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "types": "./dist/index.d.mts"
+    }
+  },
   "sideEffects": false,
   "scripts": {
-    "build": "npm run generate",
+    "build": "npm run generate && npm run transpile",
     "checkversion": "node scripts/checkversion.js",
     "clean": "rm -rf dist && rm -rf gen",
     "format": "prettier --write \"./**/*.{js,jsx,ts,tsx,mjs,mts}\"",
