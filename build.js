@@ -1,20 +1,10 @@
 import { exec } from "node:child_process";
 import { existsSync } from "node:fs";
-import {
-  mkdir,
-  rmdir,
-  readdir,
-  readFile,
-  writeFile,
-  copyFile,
-} from "node:fs/promises";
+import { mkdir, rmdir, readdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 
 const __dirname = dirname(new URL(import.meta.url).pathname);
 const genDir = join(__dirname, "./gen");
-console.log(genDir);
-
-console.log(exec);
 
 function execShellCommand(cmd) {
   return new Promise((res) => {
@@ -114,18 +104,13 @@ const processRepo = async () => {
 
           await writeFile(
             out,
-            `
-/** @jsx h */
-import { h } from "preact";
-import { forwardRef } from "preact/compat";
-import { HeroIcon } from "../types";
-
-export const ${pascalName}: HeroIcon = forwardRef((props, ref) => {
-  return (
-    ${component}
-  )
-})
-          `.trim() + "\n"
+            `import { JSX } from "preact";
+           import { forwardRef } from "preact/compat";
+           export const ${pascalName} = forwardRef<SVGSVGElement, JSX.SVGAttributes<SVGSVGElement> & JSX.HTMLAttributes<EventTarget>>((props, ref) => {
+              return (
+                ${component}
+              )
+            })`
           );
         });
 
@@ -143,12 +128,8 @@ export const ${pascalName}: HeroIcon = forwardRef((props, ref) => {
           ([importPath, name]) =>
             `export { ${name} } from "./${importPath.split(".")[0]}";`
         )
-        .join("\n") +
-        "\n" +
-        `export type { HeroIcon } from "./types";`
+        .join("\n")
     );
-
-    await copyFile("./types.ts", join(genDir, "types.ts"));
   } catch (e) {
     console.error(e);
   }
