@@ -1,9 +1,18 @@
-import { exec } from 'node:child_process';
-import { existsSync } from 'node:fs';
-import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
-import { dirname, join } from 'node:path';
+import { exec } from "node:child_process";
+import { existsSync } from "node:fs";
+import {
+  mkdir,
+  rmdir,
+  readdir,
+  readFile,
+  writeFile,
+  copyFile,
+} from "node:fs/promises";
+import { dirname, join } from "node:path";
 
 const __dirname = dirname(new URL(import.meta.url).pathname);
+const genDir = join(__dirname, "./gen");
+console.log(genDir);
 
 console.log(exec);
 
@@ -13,10 +22,11 @@ function execShellCommand(cmd) {
       res(stdout ? stdout : stderr);
     });
   });
+  ``;
 }
 
 function clearAndUpper(text) {
-  return text.replace(/-/, '').toUpperCase();
+  return text.replace(/-/, "").toUpperCase();
 }
 
 function toCamelCase(text) {
@@ -36,13 +46,16 @@ function spreadProps(svg) {
 }
 
 function convertSvgPropsToPreactProps(svg) {
-  return svg.replace(/(clip-rule|fill-rule|stroke-linecap|stroke-linejoin|stroke-width)/g, (match) => {
-    return toCamelCase(match);
-  });
+  return svg.replace(
+    /(clip-rule|fill-rule|stroke-linecap|stroke-linejoin|stroke-width)/g,
+    (match) => {
+      return toCamelCase(match);
+    }
+  );
 }
 
 function removeFill(svg) {
-  return svg.replace(/ fill="#fff"/, '');
+  return svg.replace(/ fill="#fff"/, "");
 }
 
 function setStrokeToCurrent(svg) {
@@ -50,51 +63,58 @@ function setStrokeToCurrent(svg) {
 }
 
 function properlyIndent(svg) {
-  return svg.trim().split('\n').join('\n    ');
+  return svg.trim().split("\n").join("\n    ");
 }
 
-const processSVG = pipe(spreadProps, convertSvgPropsToPreactProps, removeFill, setStrokeToCurrent, properlyIndent);
+const processSVG = pipe(
+  spreadProps,
+  convertSvgPropsToPreactProps,
+  removeFill,
+  setStrokeToCurrent,
+  properlyIndent
+);
 
-const folder = join(__dirname, 'heroicons');
-const iconsFolder = __dirname; // Beware that this could break if the file is moved
-
-const gitRepo = 'git clone https://github.com/tailwindlabs/heroicons.git';
+const folder = join(__dirname, "heroicons");
+const gitRepo = "git clone https://github.com/tailwindlabs/heroicons.git";
 
 const imports = [];
 
 const iconTypes = {
-  outline: ['24', 'outline'],
-  solid: ['24', 'solid'],
-  'mini-solid': ['20', 'solid']
+  outline: ["24", "outline"],
+  solid: ["24", "solid"],
+  "mini-solid": ["20", "solid"],
 };
 
 const processRepo = async () => {
   try {
-    const folderPromises = Object.entries(iconTypes).map(async ([svgType, iconPath]) => {
-      const srcFolder = join(folder, 'optimized', ...iconPath);
-      const outFolder = join(iconsFolder, svgType);
-      await execShellCommand(`rm -rf ${outFolder}`);
+    if (existsSync(genDir)) {
+      await rmdir(genDir, { recursive: true, force: true });
+    }
+    await mkdir(genDir);
 
-      if (!existsSync(outFolder)) {
+    const folderPromises = Object.entries(iconTypes).map(
+      async ([svgType, iconPath]) => {
+        const srcFolder = join(folder, "optimized", ...iconPath);
+        const outFolder = join(genDir, svgType);
         await mkdir(outFolder);
-      }
-      const iconFiles = await readdir(srcFolder);
-      const iconPromises = iconFiles.map(async (svg) => {
-        const src = join(srcFolder, svg);
 
-        const everythingButExtension = svg.slice(0, svg.lastIndexOf('.'));
-        const outName = everythingButExtension + '-' + svgType;
-        const outFileName = `${outName}.tsx`;
-        const out = join(outFolder, outFileName);
-        const pascalName = toPascalCase(outName);
-        const original = (await readFile(src)).toString();
-        imports.push([join(svgType, outFileName), pascalName]);
+        const iconFiles = await readdir(srcFolder);
+        const iconPromises = iconFiles.map(async (svg) => {
+          const src = join(srcFolder, svg);
 
-        const component = processSVG(original);
+          const everythingButExtension = svg.slice(0, svg.lastIndexOf("."));
+          const outName = everythingButExtension + "-" + svgType;
+          const outFileName = `${outName}.tsx`;
+          const out = join(outFolder, outFileName);
+          const pascalName = toPascalCase(outName);
+          const original = (await readFile(src)).toString();
+          imports.push([join(svgType, outFileName), pascalName]);
 
-        await writeFile(
-          out,
-          `
+          const component = processSVG(original);
+
+          await writeFile(
+            out,
+            `
 /** @jsx h */
 import { h } from "preact";
 import { forwardRef } from "preact/compat";
@@ -105,35 +125,41 @@ export const ${pascalName}: HeroIcon = forwardRef((props, ref) => {
     ${component}
   )
 })
-          `.trim() + '\n'
-        );
-      });
+          `.trim() + "\n"
+          );
+        });
 
-      await Promise.all(iconPromises);
-    });
+        await Promise.all(iconPromises);
+      }
+    );
 
     await Promise.all(folderPromises);
     console.log(`Built ${imports.length} icons!`);
     await writeFile(
-      'index.ts',
+      join(genDir, "index.mts"),
       imports
         .sort(([_, a], [__, b]) => a.localeCompare(b))
-        .map(([importPath, name]) => `export { ${name} } from "./${importPath.split('.')[0]}";`)
-        .join('\n') +
-        '\n' +
+        .map(
+          ([importPath, name]) =>
+            `export { ${name} } from "./${importPath.split(".")[0]}";`
+        )
+        .join("\n") +
+        "\n" +
         `export type { HeroIcon } from "./types";`
     );
+
+    await copyFile("./types.ts", join(genDir, "types.ts"));
   } catch (e) {
     console.error(e);
   }
 };
 
 (async () => {
-  console.time('Generating Icon Components');
+  console.time("Generating Icon Components");
   console.log(`Cloning ${gitRepo} to ${folder}`);
   await execShellCommand(`${gitRepo} ${folder}`);
   await processRepo();
-  console.log('Removing the repo...');
-  await execShellCommand(`rm -rf ${folder}`);
-  console.timeEnd('Generating Icon Components');
+  console.log("Removing the repo...");
+  await rmdir(folder, { recursive: true, force: true });
+  console.timeEnd("Generating Icon Components");
 })();
