@@ -1,7 +1,7 @@
 {
-  "name": "@panthershark/preact-heroicons",
-  "version": "1.0.0",
-  "description": "Wraps tailwind heroicons in preact components.",
+  "name": "preact-heroicons",
+  "version": "2.0.13",
+  "description": "Heroicons as Preact components",
   "type": "module",
   "types": "./dist/index.d.mts",
   "exports": {
@@ -12,32 +12,37 @@
   },
   "sideEffects": false,
   "scripts": {
+    "build": "npm run generate && npm run transpile",
     "checkversion": "node scripts/checkversion.js",
     "clean": "rm -rf dist && rm -rf gen",
-    "ci": "npm run generate && npm run transpile && rm -rf gen",
     "format": "prettier --write \"./**/*.{js,jsx,ts,tsx,mjs,mts}\"",
     "generate": "node build.js && npm run format",
     "test": "vitest",
-    "transpile": "tsc"
+    "transpile": "tsc",
+    "publish": "npm publish --access public --publish-branch preact-heroicons",
+    "postinstall": "npm run generate && npm run transpile"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/panthershark/preact-heroicons.git"
-  },
+  "repository": "github:ekwoka/preact-heroicons",
   "keywords": [
-    "preact",
-    "tailwind",
-    "css",
+    "heroicons",
     "svg",
+    "preact",
     "icons",
-    "heroicons"
+    "icon"
   ],
-  "author": "Tommy Messbauer",
+  "author": {
+    "name": "Eric Kwoka",
+    "email": "ninjatheory@gmail.com",
+    "url": "https://thekwoka.net/"
+  },
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/panthershark/preact-heroicons/issues"
+    "url": "https://github.com/ekwoka/preact-heroicons/issues"
   },
-  "homepage": "https://github.com/panthershark/preact-heroicons#readme",
+  "publishConfig": {
+    "access": "public"
+  },
+  "homepage": "https://github.com/ekwoka/preact-heroicons#readme",
   "devDependencies": {
     "@preact/preset-vite": "^2.4.0",
     "@testing-library/preact": "^3.2.2",

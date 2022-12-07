@@ -1,15 +1,15 @@
-import { test, expect } from 'vitest';
-import { render, screen } from '@testing-library/preact';
-import { ChevronRightSolid, CheckOutline } from '../.';
+import { test, expect } from "vitest";
+import { render, screen } from "@testing-library/preact";
+import { ChevronRightSolid, CheckOutline } from "../.";
 
-test('render icon', () => {
+test("render icon", () => {
   render(<ChevronRightSolid />);
 });
 
-test('render icon with class', () => {
+test("render icon with class", () => {
   render(<CheckOutline data-testid="blarg" class="floop" />);
-  const el = screen.getByTestId('blarg');
+  const el = screen.getByTestId("blarg");
 
   expect(el).toBeDefined();
-  expect(el.className).toEqual('floop');
+  expect(el.className).toEqual("floop");
 });
